@@ -12,6 +12,8 @@
 #' as required by PLINK's --maf parameter. The default value is set to 0.01
 #' @param hwe Specifies the significance threshold Fisher's exact test p-value for Hardy-Weinberg equilibrium
 #' as required by PLINK's --hwe parameter. The default value is set to 0.0000001 (1E-7)
+#' @param includeMaf If set to FALSE, the minor allele frequency is not considered in the QC. 
+#' Useful e.g. in ROH analyses. The default value is TRUE. 
 #' @param otherParameters Optional parameters that are necessary for a specific analysis. 
 #' Default value set to " --dog --allow-no-sex --nonfounders --autosome" 
 #' @keywords plink
@@ -20,12 +22,24 @@
 #' plinkQC("myInputFileName")
 
 plinkQC <- function(dataIn, missPerSample = 0.10, missPerSNP = 0.10, 
-                    maf = 0.01, hwe = 0.0000001, 
+                    maf = 0.01, hwe = 0.0000001, includeMaf = TRUE,
                     otherParameters = "--dog --allow-no-sex --nonfounders --autosome"){
 
+  if (includeMaf == TRUE) {
   #run quality control with PLINK
   runPlink(paste(otherParameters, "--file",dataIn,"--mind", missPerSample,
                "--maf", maf, "--geno", missPerSNP, "--hwe", hwe,
                "--make-bed --out afterQC", sep=" "))
+    } else if (includeMaf == FALSE){
+      #run quality control with PLINK withpout minor allele frequency threshold restriction
+      runPlink(paste(otherParameters, "--file",dataIn,"--mind", missPerSample,
+                     "--geno", missPerSNP, "--hwe", hwe,
+                     "--make-bed --out afterQC", sep=" "))
+    } else {
+    # stop with error message
+      stop("The 'includeMaf' option should be set to TRUE or FALSE")
+  }
 
+    
+    
 }
